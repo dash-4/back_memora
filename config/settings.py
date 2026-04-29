@@ -246,7 +246,7 @@ WSGI_APPLICATION = 'config.wsgi.application'
 # --- DATABASE (SUPABASE) ---
 DATABASES = {
     'default': dj_database_url.config(
-        default=os.environ.get('POSTGRES_URL'),
+        default=os.environ.get('POSTGRES_URL') or f'sqlite:///{BASE_DIR / "db.sqlite3"}',
         conn_max_age=600,
         conn_health_checks=True,
     )
@@ -289,12 +289,16 @@ CORS_ALLOW_ALL_ORIGINS = True # Для разработки можно оста�
 
 CORS_ALLOW_CREDENTIALS = True
 
-# Обязательные настройки для работы через HTTPS
-SESSION_COOKIE_SECURE = True
-CSRF_COOKIE_SECURE = True
+IS_PRODUCTION = os.environ.get('DJANGO_ENV') == 'production'
+
+SESSION_COOKIE_SECURE = IS_PRODUCTION
+CSRF_COOKIE_SECURE = IS_PRODUCTION
+SESSION_COOKIE_SAMESITE = 'Lax' if IS_PRODUCTION else None
+CSRF_COOKIE_SAMESITE = 'Lax' if IS_PRODUCTION else None
 SECURE_BROWSER_XSS_FILTER = True
 SECURE_CONTENT_TYPE_NOSNIFF = True
-SECURE_SSL_REDIRECT = True # Перенаправлять на HTTPS
+SECURE_SSL_REDIRECT = False # Перенаправлять на HTTPS
+APPEND_SLASH = False
 
 CSRF_TRUSTED_ORIGINS = [
     'https://front-memora.vercel.app',
